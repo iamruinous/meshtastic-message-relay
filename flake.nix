@@ -6,9 +6,13 @@
     flake-utils.url = "github:numtide/flake-utils";
   };
 
-  outputs = { self, nixpkgs, flake-utils }:
-    flake-utils.lib.eachDefaultSystem (system:
-      let
+  outputs = {
+    self,
+    nixpkgs,
+    flake-utils,
+  }:
+    flake-utils.lib.eachDefaultSystem (
+      system: let
         pkgs = nixpkgs.legacyPackages.${system};
 
         # Build the Go module
@@ -19,13 +23,11 @@
           src = ./.;
 
           # Vendor hash for Go dependencies
-          # To update: run `nix build` and copy the hash from the error message
-          # Or use `nix-prefetch` / `go mod vendor` + `nix hash path vendor`
-          # Set to null to compute automatically (not recommended for CI)
-          vendorHash = null;
+          # To update: run `go mod vendor && nix hash path vendor`
+          vendorHash = "sha256-5hO7c4uhMDNPxVebh1Z5Jl1OZDLxmWYCpT6xiAvLtFI=";
 
           # Build the main binary
-          subPackages = [ "cmd/relay" ];
+          subPackages = ["cmd/relay"];
 
           # Rename the binary
           postInstall = ''
@@ -36,12 +38,11 @@
             description = "Meshtastic Message Relay - Forward messages to HTTP endpoints, files, and more";
             homepage = "https://github.com/iamruinous/meshtastic-message-relay";
             license = licenses.mit;
-            maintainers = [ ];
+            maintainers = [];
             mainProgram = "meshtastic-relay";
           };
         };
-      in
-      {
+      in {
         packages = {
           default = meshtastic-relay;
           meshtastic-relay = meshtastic-relay;
@@ -79,7 +80,8 @@
           '';
         };
       }
-    ) // {
+    )
+    // {
       # Overlay for including in other flakes
       overlays.default = final: prev: {
         meshtastic-relay = self.packages.${prev.system}.meshtastic-relay;
