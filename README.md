@@ -85,6 +85,24 @@ go build -o meshtastic-relay ./cmd/relay
 make build
 ```
 
+### Building with Nix
+
+This project includes a Nix flake for reproducible builds:
+
+```bash
+# Build the package
+nix build
+
+# Run directly without installing
+nix run
+
+# Enter development shell
+nix develop
+
+# Or with direnv (automatic shell activation)
+direnv allow
+```
+
 ## Configuration
 
 Create a `config.yaml` file:
