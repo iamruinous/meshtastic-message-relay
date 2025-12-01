@@ -1,0 +1,80 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Get version
+        id: version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+
+      - name: Run tests
+        run: go test -v ./...
+
+      - name: Build binaries
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          COMMIT=$(git rev-parse --short HEAD)
+          DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
+          LDFLAGS="-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}"
+
+          mkdir -p dist
+
+          # Linux
+          GOOS=linux GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o dist/meshtastic-relay-linux-amd64 ./cmd/relay
+          GOOS=linux GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o dist/meshtastic-relay-linux-arm64 ./cmd/relay
+          GOOS=linux GOARCH=arm GOARM=7 go build -ldflags "${LDFLAGS}" -o dist/meshtastic-relay-linux-armv7 ./cmd/relay
+
+          # macOS
+          GOOS=darwin GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o dist/meshtastic-relay-darwin-amd64 ./cmd/relay
+          GOOS=darwin GOARCH=arm64 go build -ldflags "${LDFLAGS}" -o dist/meshtastic-relay-darwin-arm64 ./cmd/relay
+
+          # Windows
+          GOOS=windows GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o dist/meshtastic-relay-windows-amd64.exe ./cmd/relay
+
+      - name: Create checksums
+        run: |
+          cd dist
+          sha256sum * > checksums.txt
+
+      - name: Create archives
+        run: |
+          cd dist
+          for f in meshtastic-relay-*; do
+            if [[ ! "$f" == *.exe ]]; then
+              tar czf "${f}.tar.gz" "$f"
+              rm "$f"
+            else
+              zip "${f%.exe}.zip" "$f"
+              rm "$f"
+            fi
+          done
+          sha256sum *.tar.gz *.zip > checksums.txt
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: dist/*
+          generate_release_notes: true
+          draft: false
+          prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}

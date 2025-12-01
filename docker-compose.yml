@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  meshtastic-relay:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: iamruinous/meshtastic-message-relay:latest
+    container_name: meshtastic-relay
+    restart: unless-stopped
+    volumes:
+      - ./configs/example.yaml:/etc/meshtastic-relay/config.yaml:ro
+      - ./logs:/var/log/meshtastic
+    # Uncomment for serial connection
+    # devices:
+    #   - /dev/ttyUSB0:/dev/ttyUSB0
+    # Uncomment for TCP connection
+    # network_mode: host
+    environment:
+      - TZ=UTC
+    # Optional: Enable metrics
+    # ports:
+    #   - "9090:9090"
+
+  # Optional: Apprise notification service
+  # apprise:
+  #   image: caronc/apprise:latest
+  #   container_name: apprise
+  #   restart: unless-stopped
+  #   ports:
+  #     - "8000:8000"
+  #   volumes:
+  #     - ./configs/apprise.yaml:/config/apprise.yaml:ro
+  #   environment:
+  #     - APPRISE_CONFIG_FILE=/config/apprise.yaml
