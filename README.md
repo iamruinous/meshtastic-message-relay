@@ -295,19 +295,44 @@ See existing implementations in `internal/output/` for examples.
 
 ## Roadmap
 
-- [ ] Core relay service implementation
-- [ ] Serial connection support
-- [ ] TCP connection support
-- [ ] MQTT connection support
-- [ ] stdout output
-- [ ] File output with rotation
-- [ ] Apprise integration
-- [ ] Generic webhook output
-- [ ] Message filtering
-- [ ] GitHub Actions CI/CD
-- [ ] Docker image publishing
-- [ ] Prometheus metrics
+### Completed
+
+- [x] Core relay service implementation
+- [x] Serial connection support
+- [x] TCP connection support
+- [x] MQTT connection support
+- [x] stdout output
+- [x] File output with rotation
+- [x] Apprise integration
+- [x] Generic webhook output
+- [x] CLI framework with Cobra
+- [x] Interactive TUI with Bubbletea
+- [x] Configuration management with Viper
+- [x] Structured logging with Zap
+- [x] GitHub Actions CI/CD (build, release, docker)
+- [x] Dockerfile and docker-compose
+- [x] Nix flake for reproducible builds
+- [x] Device simulator for testing (PTY-based)
+- [x] Meshtastic protocol framing/parsing
+
+### In Progress
+
+- [ ] Message filtering by type/node/channel
+- [ ] Docker image publishing to GHCR
+
+### Planned
+
+- [ ] Prometheus metrics endpoint
 - [ ] Web UI for status monitoring
+- [ ] Position/telemetry specific outputs
+- [ ] Node database persistence
+- [ ] Message acknowledgment support
+- [ ] Rate limiting for outputs
+- [ ] Retry logic with exponential backoff
+- [ ] Health check endpoint
+- [ ] Graceful degradation when outputs fail
+- [ ] Integration tests with real devices
+- [ ] Plugin system for custom outputs
 
 ## Inspiration
 
