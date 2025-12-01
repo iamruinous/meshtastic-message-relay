@@ -1,10 +1,10 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"github.com/iamruinous/meshtastic-message-relay/internal/cli"
 )
 
+// Build information, injected at compile time
 var (
 	version = "dev"
 	commit  = "none"
@@ -12,12 +12,9 @@ var (
 )
 
 func main() {
-	// TODO: Implement CLI with cobra
-	// TODO: Load configuration
-	// TODO: Initialize connection
-	// TODO: Initialize outputs
-	// TODO: Start relay service
-	fmt.Printf("meshtastic-relay %s (%s) built on %s\n", version, commit, date)
-	fmt.Println("Not yet implemented - see README.md for roadmap")
-	os.Exit(0)
+	// Set version information for the CLI
+	cli.SetVersionInfo(version, commit, date)
+
+	// Execute the CLI
+	cli.Execute()
 }
