@@ -11,6 +11,7 @@ require (
 	github.com/spf13/viper v1.21.0
 	go.bug.st/serial v1.6.4
 	go.uber.org/zap v1.27.1
+	golang.org/x/sys v0.36.0
 )
 
 require (
@@ -46,6 +47,5 @@ require (
 	go.yaml.in/yaml/v3 v3.0.4 // indirect
 	golang.org/x/net v0.44.0 // indirect
 	golang.org/x/sync v0.17.0 // indirect
-	golang.org/x/sys v0.36.0 // indirect
 	golang.org/x/text v0.29.0 // indirect
 )
