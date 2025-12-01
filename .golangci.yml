@@ -34,8 +34,6 @@ linters:
     errcheck:
       check-type-assertions: true
       check-blank: true
-    govet:
-      check-shadowing: true
     misspell:
       locale: US
     nakedret:
