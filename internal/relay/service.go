@@ -142,7 +142,7 @@ func (s *Service) GetOutputs() []output.Output {
 
 func (s *Service) initConnection() error {
 	var err error
-	s.connection, err = connection.New(s.config.Connection)
+	s.connection, err = connection.New(&s.config.Connection)
 	return err
 }
 

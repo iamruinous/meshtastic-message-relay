@@ -8,7 +8,7 @@ import (
 )
 
 // New creates a new Connection based on the configuration
-func New(cfg config.ConnectionConfig) (Connection, error) {
+func New(cfg *config.ConnectionConfig) (Connection, error) {
 	switch cfg.Type {
 	case "serial":
 		return NewSerial(cfg.Serial)
