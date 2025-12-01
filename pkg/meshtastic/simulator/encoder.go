@@ -7,10 +7,10 @@ import (
 
 // Protobuf wire types
 const (
-	wireVarint  = 0
-	wire64bit   = 1
-	wireBytes   = 2
-	wire32bit   = 5
+	wireVarint = 0
+	wire64bit  = 1
+	wireBytes  = 2
+	wire32bit  = 5
 )
 
 // encodeVarint encodes a uint64 as a protobuf varint
@@ -56,15 +56,6 @@ func encodeInt32(fieldNum int, v int32) []byte {
 	return result
 }
 
-// encodeBool encodes a boolean field
-func encodeBool(fieldNum int, v bool) []byte {
-	val := uint32(0)
-	if v {
-		val = 1
-	}
-	return encodeUint32(fieldNum, val)
-}
-
 // encodeFixed32 encodes a fixed32 field
 func encodeFixed32(fieldNum int, v uint32) []byte {
 	result := encodeTag(fieldNum, wire32bit)
@@ -87,9 +78,9 @@ func encodeFloat32(fieldNum int, v float32) []byte {
 // EncodeMyNodeInfo encodes a MyNodeInfo message
 func EncodeMyNodeInfo(nodeNum uint32, rebootCount uint32) []byte {
 	var msg []byte
-	msg = append(msg, encodeUint32(1, nodeNum)...)      // my_node_num
-	msg = append(msg, encodeUint32(8, rebootCount)...)  // reboot_count
-	msg = append(msg, encodeUint32(11, 30000)...)       // min_app_version
+	msg = append(msg, encodeUint32(1, nodeNum)...)     // my_node_num
+	msg = append(msg, encodeUint32(8, rebootCount)...) // reboot_count
+	msg = append(msg, encodeUint32(11, 30000)...)      // min_app_version
 	return msg
 }
 

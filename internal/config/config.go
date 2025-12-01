@@ -1,3 +1,4 @@
+// Package config provides configuration types and loading for the relay service.
 package config
 
 import "time"

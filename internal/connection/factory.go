@@ -1,3 +1,4 @@
+// Package connection provides Meshtastic connection implementations.
 package connection
 
 import (

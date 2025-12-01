@@ -2,7 +2,6 @@ package config
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/spf13/viper"
 )
@@ -145,24 +144,6 @@ func getBool(m map[string]interface{}, key string) bool {
 		}
 	}
 	return false
-}
-
-func getDuration(m map[string]interface{}, key string, defaultVal time.Duration) time.Duration {
-	if v, ok := m[key]; ok {
-		switch val := v.(type) {
-		case string:
-			if d, err := time.ParseDuration(val); err == nil {
-				return d
-			}
-		case int:
-			return time.Duration(val) * time.Second
-		case int64:
-			return time.Duration(val) * time.Second
-		case float64:
-			return time.Duration(val) * time.Second
-		}
-	}
-	return defaultVal
 }
 
 func toUint32Slice(v interface{}) []uint32 {

@@ -1,3 +1,4 @@
+// Package output provides message output implementations.
 package output
 
 import (
@@ -104,7 +105,7 @@ func (a *Apprise) Send(ctx context.Context, msg *message.Packet) error {
 	if err != nil {
 		return fmt.Errorf("failed to send to apprise: %w", err)
 	}
-	defer resp.Body.Close()
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("apprise returned status %d", resp.StatusCode)

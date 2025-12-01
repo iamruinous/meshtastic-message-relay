@@ -83,7 +83,7 @@ func NewFile(cfg config.OutputConfig) (*File, error) {
 }
 
 // Send writes a message to the file
-func (f *File) Send(ctx context.Context, msg *message.Packet) error {
+func (f *File) Send(_ context.Context, msg *message.Packet) error {
 	f.mu.Lock()
 	defer f.mu.Unlock()
 
@@ -136,17 +136,17 @@ func (f *File) checkRotation() error {
 	}
 
 	// Close current file
-	f.file.Close()
+	_ = f.file.Close()
 
 	// Rotate existing backups
 	for i := f.maxBackups - 1; i >= 1; i-- {
 		oldPath := fmt.Sprintf("%s.%d", f.path, i)
 		newPath := fmt.Sprintf("%s.%d", f.path, i+1)
-		os.Rename(oldPath, newPath)
+		_ = os.Rename(oldPath, newPath)
 	}
 
 	// Rename current to .1
-	os.Rename(f.path, f.path+".1")
+	_ = os.Rename(f.path, f.path+".1")
 
 	// Open new file
 	file, err := os.OpenFile(f.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)

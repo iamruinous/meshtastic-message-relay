@@ -56,7 +56,7 @@ func (td *TestDevice) Start() string {
 // Stop stops the test device
 func (td *TestDevice) Stop() {
 	td.cancel()
-	td.Device.Stop()
+	_ = td.Device.Stop()
 }
 
 // MustSendTextMessage sends a text message or fails the test
@@ -77,9 +77,9 @@ func (td *TestDevice) MustSendPosition(fromNode uint32, lat, lon float64, alt in
 func (td *TestDevice) WaitForConfig(timeout time.Duration) bool {
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
-		td.Device.mu.RLock()
-		sent := td.Device.configSent
-		td.Device.mu.RUnlock()
+		td.mu.RLock()
+		sent := td.configSent
+		td.mu.RUnlock()
 		if sent {
 			return true
 		}

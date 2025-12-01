@@ -1,3 +1,4 @@
+// Package message defines message types and conversion utilities.
 package message
 
 import (

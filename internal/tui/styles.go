@@ -8,14 +8,8 @@ var (
 	// Colors
 	primaryColor   = lipgloss.Color("#7C3AED")
 	secondaryColor = lipgloss.Color("#10B981")
-	warningColor   = lipgloss.Color("#F59E0B")
 	errorColor     = lipgloss.Color("#EF4444")
 	mutedColor     = lipgloss.Color("#6B7280")
-	bgColor        = lipgloss.Color("#1F2937")
-
-	// Base styles
-	baseStyle = lipgloss.NewStyle().
-			Padding(0, 1)
 
 	// Title style
 	titleStyle = lipgloss.NewStyle().

@@ -111,10 +111,8 @@ func TestEncodeNodeInfo(t *testing.T) {
 
 	if result.NodeInfo.User == nil {
 		t.Error("User is nil")
-	} else {
-		if result.NodeInfo.User.LongName != "Remote Node" {
-			t.Errorf("Expected long name 'Remote Node', got '%s'", result.NodeInfo.User.LongName)
-		}
+	} else if result.NodeInfo.User.LongName != "Remote Node" {
+		t.Errorf("Expected long name 'Remote Node', got '%s'", result.NodeInfo.User.LongName)
 	}
 }
 

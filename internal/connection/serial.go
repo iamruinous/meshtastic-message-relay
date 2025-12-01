@@ -17,13 +17,13 @@ import (
 
 // Serial implements Connection for serial port connections
 type Serial struct {
-	config    config.SerialConfig
-	port      serial.Port
-	framer    *meshtastic.StreamFramer
-	messages  chan *message.Packet
-	nodeDB    map[uint32]*meshtastic.NodeInfo
-	myInfo    *meshtastic.MyNodeInfo
-	logger    *zap.Logger
+	config   config.SerialConfig
+	port     serial.Port
+	framer   *meshtastic.StreamFramer
+	messages chan *message.Packet
+	nodeDB   map[uint32]*meshtastic.NodeInfo
+	myInfo   *meshtastic.MyNodeInfo
+	logger   *zap.Logger
 
 	mu        sync.RWMutex
 	connected bool
@@ -69,7 +69,7 @@ func (s *Serial) Connect(ctx context.Context) error {
 
 	// Set read timeout
 	if err := port.SetReadTimeout(100 * time.Millisecond); err != nil {
-		port.Close()
+		_ = port.Close()
 		return fmt.Errorf("failed to set read timeout: %w", err)
 	}
 
@@ -94,7 +94,7 @@ func (s *Serial) Messages() <-chan *message.Packet {
 }
 
 // Send transmits a packet over the serial connection
-func (s *Serial) Send(ctx context.Context, packet *message.Packet) error {
+func (s *Serial) Send(_ context.Context, _ *message.Packet) error {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 

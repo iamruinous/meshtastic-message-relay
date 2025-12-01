@@ -16,7 +16,7 @@ func TestPTYBidirectional(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create PTY: %v", err)
 	}
-	defer pty.Close()
+	defer func() { _ = pty.Close() }()
 
 	t.Logf("PTY created: master=%v, slave=%s", pty.Master.Fd(), pty.SlavePath)
 
@@ -25,7 +25,7 @@ func TestPTYBidirectional(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open slave: %v", err)
 	}
-	defer slave.Close()
+	defer func() { _ = slave.Close() }()
 
 	// Test master -> slave
 	testData := []byte("Hello from master")
@@ -36,7 +36,7 @@ func TestPTYBidirectional(t *testing.T) {
 	t.Logf("Wrote %d bytes to master", n)
 
 	// Read from slave
-	slave.SetReadDeadline(time.Now().Add(1 * time.Second))
+	_ = slave.SetReadDeadline(time.Now().Add(1 * time.Second))
 	buf := make([]byte, 100)
 	n, err = slave.Read(buf)
 	if err != nil {
@@ -57,7 +57,7 @@ func TestPTYBidirectional(t *testing.T) {
 	t.Logf("Wrote %d bytes to slave", n)
 
 	// Read from master
-	pty.Master.SetReadDeadline(time.Now().Add(1 * time.Second))
+	_ = pty.Master.SetReadDeadline(time.Now().Add(1 * time.Second))
 	buf2 := make([]byte, 100)
 	n, err = pty.Master.Read(buf2)
 	if err != nil {
@@ -78,7 +78,7 @@ func TestPTYWithSerialLibrary(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create PTY: %v", err)
 	}
-	defer pty.Close()
+	defer func() { _ = pty.Close() }()
 
 	t.Logf("PTY slave path: %s", pty.SlavePath)
 
@@ -87,7 +87,7 @@ func TestPTYWithSerialLibrary(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open slave: %v", err)
 	}
-	defer slave.Close()
+	defer func() { _ = slave.Close() }()
 
 	// Set raw mode on slave too
 	if err := setRawMode(int(slave.Fd())); err != nil {
@@ -103,7 +103,7 @@ func TestPTYWithSerialLibrary(t *testing.T) {
 	t.Logf("Wrote %d bytes to slave: %v", n, framedPacket)
 
 	// Read from master
-	pty.Master.SetReadDeadline(time.Now().Add(1 * time.Second))
+	_ = pty.Master.SetReadDeadline(time.Now().Add(1 * time.Second))
 	buf := make([]byte, 100)
 	n, err = pty.Master.Read(buf)
 	if err != nil {
@@ -131,7 +131,7 @@ func TestPTYWithGoSerial(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create PTY: %v", err)
 	}
-	defer pty.Close()
+	defer func() { _ = pty.Close() }()
 
 	t.Logf("PTY slave path: %s", pty.SlavePath)
 
@@ -147,7 +147,7 @@ func TestPTYWithGoSerial(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open serial port: %v", err)
 	}
-	defer port.Close()
+	defer func() { _ = port.Close() }()
 
 	// Set read timeout
 	if err := port.SetReadTimeout(100 * time.Millisecond); err != nil {
@@ -166,7 +166,7 @@ func TestPTYWithGoSerial(t *testing.T) {
 	time.Sleep(50 * time.Millisecond)
 
 	// Read from master
-	pty.Master.SetReadDeadline(time.Now().Add(1 * time.Second))
+	_ = pty.Master.SetReadDeadline(time.Now().Add(1 * time.Second))
 	buf := make([]byte, 100)
 	n, err = pty.Master.Read(buf)
 	if err != nil {
@@ -194,7 +194,7 @@ func TestPTYFullFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create PTY: %v", err)
 	}
-	defer pty.Close()
+	defer func() { _ = pty.Close() }()
 
 	t.Logf("PTY slave path: %s", pty.SlavePath)
 
@@ -210,7 +210,7 @@ func TestPTYFullFlow(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open serial port: %v", err)
 	}
-	defer port.Close()
+	defer func() { _ = port.Close() }()
 
 	if err := port.SetReadTimeout(100 * time.Millisecond); err != nil {
 		t.Logf("Warning: failed to set read timeout: %v", err)
@@ -238,7 +238,7 @@ func TestPTYFullFlow(t *testing.T) {
 	go func() {
 		buf := make([]byte, 100)
 		for {
-			pty.Master.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+			_ = pty.Master.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
 			n, err := pty.Master.Read(buf)
 			if err != nil {
 				continue
@@ -299,7 +299,7 @@ func TestPTYWithFramer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to create PTY: %v", err)
 	}
-	defer pty.Close()
+	defer func() { _ = pty.Close() }()
 
 	// Use go.bug.st/serial to open slave
 	mode := &serial.Mode{
@@ -313,7 +313,7 @@ func TestPTYWithFramer(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to open serial port: %v", err)
 	}
-	defer port.Close()
+	defer func() { _ = port.Close() }()
 
 	if err := port.SetReadTimeout(100 * time.Millisecond); err != nil {
 		t.Logf("Warning: failed to set read timeout: %v", err)
@@ -328,7 +328,7 @@ func TestPTYWithFramer(t *testing.T) {
 	masterReceived := make(chan []byte, 10)
 	go func() {
 		for {
-			pty.Master.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+			_ = pty.Master.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
 			data, err := masterFramer.ReadPacket()
 			if err != nil {
 				continue

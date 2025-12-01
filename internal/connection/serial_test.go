@@ -14,7 +14,7 @@ import (
 
 func init() {
 	// Initialize logging for tests
-	logging.Initialize(logging.Config{Level: "error", Format: "text"})
+	_ = logging.Initialize(logging.Config{Level: "error", Format: "text"})
 }
 
 func TestSerialConnection(t *testing.T) {
@@ -48,7 +48,7 @@ func TestSerialConnection(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to connect: %v", err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	// Verify connection
 	if !conn.IsConnected() {
@@ -92,7 +92,7 @@ func TestSerialReceiveMessage(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to connect: %v", err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	// Wait for config
 	if !device.WaitForConfig(5 * time.Second) {
@@ -148,7 +148,7 @@ func TestSerialMultipleMessages(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Failed to connect: %v", err)
 	}
-	defer conn.Close()
+	defer func() { _ = conn.Close() }()
 
 	// Wait for config
 	device.WaitForConfig(5 * time.Second)

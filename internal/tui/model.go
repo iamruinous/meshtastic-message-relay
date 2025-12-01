@@ -1,3 +1,4 @@
+// Package tui provides the terminal user interface.
 package tui
 
 import (
@@ -42,12 +43,12 @@ type Model struct {
 
 // MessageDisplay holds a message for display
 type MessageDisplay struct {
-	Time     time.Time
-	From     string
-	Type     string
-	Content  string
-	SNR      float32
-	RSSI     int32
+	Time    time.Time
+	From    string
+	Type    string
+	Content string
+	SNR     float32
+	RSSI    int32
 }
 
 // New creates a new TUI model

@@ -19,11 +19,11 @@ import (
 
 // MQTT implements Connection for MQTT broker connections
 type MQTT struct {
-	config    config.MQTTConfig
-	client    mqtt.Client
-	messages  chan *message.Packet
-	nodeDB    map[uint32]*meshtastic.NodeInfo
-	logger    *zap.Logger
+	config   config.MQTTConfig
+	client   mqtt.Client
+	messages chan *message.Packet
+	nodeDB   map[uint32]*meshtastic.NodeInfo
+	logger   *zap.Logger
 
 	mu        sync.RWMutex
 	connected bool
@@ -42,7 +42,7 @@ func NewMQTT(cfg config.MQTTConfig) (*MQTT, error) {
 }
 
 // Connect establishes the MQTT connection
-func (m *MQTT) Connect(ctx context.Context) error {
+func (m *MQTT) Connect(_ context.Context) error {
 	m.mu.Lock()
 	defer m.mu.Unlock()
 
@@ -116,7 +116,7 @@ func (m *MQTT) onConnect(client mqtt.Client) {
 }
 
 // onConnectionLost is called when the MQTT connection is lost
-func (m *MQTT) onConnectionLost(client mqtt.Client, err error) {
+func (m *MQTT) onConnectionLost(_ mqtt.Client, err error) {
 	m.logger.Warn("MQTT connection lost", zap.Error(err))
 
 	m.mu.Lock()
@@ -125,7 +125,7 @@ func (m *MQTT) onConnectionLost(client mqtt.Client, err error) {
 }
 
 // messageHandler processes incoming MQTT messages
-func (m *MQTT) messageHandler(client mqtt.Client, msg mqtt.Message) {
+func (m *MQTT) messageHandler(_ mqtt.Client, msg mqtt.Message) {
 	topic := msg.Topic()
 	payload := msg.Payload()
 
@@ -223,7 +223,7 @@ func (m *MQTT) parseMessage(topic string, payload []byte) *message.Packet {
 		if strings.HasPrefix(part, "!") && len(part) == 9 {
 			// This looks like a node ID
 			var nodeNum uint32
-			fmt.Sscanf(part, "!%08x", &nodeNum)
+			_, _ = fmt.Sscanf(part, "!%08x", &nodeNum)
 			if nodeNum != 0 {
 				packet.From = nodeNum
 			}
@@ -238,20 +238,20 @@ func (m *MQTT) parsePortNum(typeStr, topic string) message.PortNum {
 	typeStr = strings.ToUpper(typeStr)
 
 	portMap := map[string]message.PortNum{
-		"TEXT_MESSAGE_APP":  message.PortNumTextMessage,
-		"TEXT":              message.PortNumTextMessage,
-		"POSITION_APP":      message.PortNumPosition,
-		"POSITION":          message.PortNumPosition,
-		"NODEINFO_APP":      message.PortNumNodeInfo,
-		"NODEINFO":          message.PortNumNodeInfo,
-		"TELEMETRY_APP":     message.PortNumTelemetry,
-		"TELEMETRY":         message.PortNumTelemetry,
-		"ROUTING_APP":       message.PortNumRouting,
-		"ROUTING":           message.PortNumRouting,
-		"TRACEROUTE_APP":    message.PortNumTraceroute,
-		"TRACEROUTE":        message.PortNumTraceroute,
-		"NEIGHBORINFO_APP":  message.PortNumNeighborInfo,
-		"NEIGHBORINFO":      message.PortNumNeighborInfo,
+		"TEXT_MESSAGE_APP": message.PortNumTextMessage,
+		"TEXT":             message.PortNumTextMessage,
+		"POSITION_APP":     message.PortNumPosition,
+		"POSITION":         message.PortNumPosition,
+		"NODEINFO_APP":     message.PortNumNodeInfo,
+		"NODEINFO":         message.PortNumNodeInfo,
+		"TELEMETRY_APP":    message.PortNumTelemetry,
+		"TELEMETRY":        message.PortNumTelemetry,
+		"ROUTING_APP":      message.PortNumRouting,
+		"ROUTING":          message.PortNumRouting,
+		"TRACEROUTE_APP":   message.PortNumTraceroute,
+		"TRACEROUTE":       message.PortNumTraceroute,
+		"NEIGHBORINFO_APP": message.PortNumNeighborInfo,
+		"NEIGHBORINFO":     message.PortNumNeighborInfo,
 	}
 
 	if portNum, ok := portMap[typeStr]; ok {
@@ -275,7 +275,7 @@ func (m *MQTT) Messages() <-chan *message.Packet {
 }
 
 // Send transmits a packet over MQTT
-func (m *MQTT) Send(ctx context.Context, packet *message.Packet) error {
+func (m *MQTT) Send(_ context.Context, _ *message.Packet) error {
 	m.mu.RLock()
 	defer m.mu.RUnlock()
 

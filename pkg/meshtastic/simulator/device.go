@@ -1,3 +1,4 @@
+// Package simulator provides a Meshtastic device simulator for testing.
 package simulator
 
 import (
@@ -84,21 +85,21 @@ func DefaultConfig() DeviceConfig {
 
 // Device simulates a Meshtastic device
 type Device struct {
-	config   DeviceConfig
-	pty      *PTY
-	framer   *meshtastic.StreamFramer
-	logger   func(format string, args ...interface{})
+	config DeviceConfig
+	pty    *PTY
+	framer *meshtastic.StreamFramer
+	logger func(format string, args ...interface{})
 
-	mu          sync.RWMutex
-	running     bool
-	stopCh      chan struct{}
-	packetID    uint32
-	configSent  bool
+	mu         sync.RWMutex
+	running    bool
+	stopCh     chan struct{}
+	packetID   uint32
+	configSent bool
 }
 
 // New creates a new simulated device
 func New(config DeviceConfig) *Device {
-	logger := func(format string, args ...interface{}) {}
+	logger := func(_ string, _ ...interface{}) {}
 	if config.Verbose {
 		logger = func(format string, args ...interface{}) {
 			fmt.Printf("[SIM] "+format+"\n", args...)
@@ -160,7 +161,7 @@ func (d *Device) Stop() error {
 	d.running = false
 
 	if d.pty != nil {
-		d.pty.Close()
+		_ = d.pty.Close()
 		d.pty = nil
 	}
 
@@ -225,7 +226,7 @@ func (d *Device) readLoop(ctx context.Context) {
 
 		// Use short deadline to allow checking stop conditions
 		// but still allow blocking reads to work
-		d.pty.Master.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
+		_ = d.pty.Master.SetReadDeadline(time.Now().Add(500 * time.Millisecond))
 
 		data, err := d.framer.ReadPacket()
 		if err != nil {
@@ -272,7 +273,8 @@ func (d *Device) handleToRadio(data []byte) {
 		wireType := tag & 0x07
 		pos++
 
-		if wireType == 0 { // Varint
+		switch wireType {
+		case 0: // Varint
 			val, n := decodeVarint(data[pos:])
 			pos += n
 
@@ -281,7 +283,7 @@ func (d *Device) handleToRadio(data []byte) {
 				d.logger("Received config request (id=%d)", val)
 				d.sendConfig(uint32(val))
 			}
-		} else if wireType == 2 { // Length-delimited
+		case 2: // Length-delimited
 			length, n := decodeVarint(data[pos:])
 			pos += n
 			pos += int(length)
@@ -302,7 +304,7 @@ func (d *Device) sendConfig(configID uint32) {
 
 	// Send MyInfo
 	myInfo := EncodeMyNodeInfo(d.config.NodeNum, 1)
-	d.sendFromRadio(nil, myInfo, nil, 0)
+	_ = d.sendFromRadio(nil, myInfo, nil, 0)
 
 	// Send our own NodeInfo
 	user := EncodeUser(
@@ -318,7 +320,7 @@ func (d *Device) sendConfig(configID uint32) {
 		uint32(time.Now().Unix()),
 	)
 	nodeInfo := EncodeNodeInfo(d.config.NodeNum, user, position, 0, uint32(time.Now().Unix()))
-	d.sendFromRadio(nil, nil, nodeInfo, 0)
+	_ = d.sendFromRadio(nil, nil, nodeInfo, 0)
 
 	// Send other nodes
 	for _, node := range d.config.SimulatedNodes {
@@ -341,11 +343,11 @@ func (d *Device) sendConfig(configID uint32) {
 			float32(rand.Intn(20)-10),
 			uint32(time.Now().Unix()-int64(rand.Intn(600))),
 		)
-		d.sendFromRadio(nil, nil, nodeInfo, 0)
+		_ = d.sendFromRadio(nil, nil, nodeInfo, 0)
 	}
 
 	// Send config complete
-	d.sendFromRadio(nil, nil, nil, configID)
+	_ = d.sendFromRadio(nil, nil, nil, configID)
 
 	d.logger("Configuration sent")
 }
@@ -370,9 +372,9 @@ func (d *Device) createTextMessagePacket(fromNode uint32, text string) []byte {
 		d.packetID,
 		data,
 		uint32(time.Now().Unix()),
-		float32(rand.Intn(20)-5),   // SNR
-		int32(-60-rand.Intn(40)),   // RSSI
-		3,                          // HopLimit
+		float32(rand.Intn(20)-5), // SNR
+		int32(-60-rand.Intn(40)), // RSSI
+		3,                        // HopLimit
 	)
 
 	return packet
@@ -436,7 +438,7 @@ func (d *Device) messageLoop(ctx context.Context) {
 				msg := messages[rand.Intn(len(messages))]
 
 				d.logger("Sending message from %s: %s", node.ShortName, msg)
-				d.SendTextMessage(node.NodeNum, msg)
+				_ = d.SendTextMessage(node.NodeNum, msg)
 			}
 		}
 	}
@@ -480,7 +482,7 @@ func (d *Device) ReadRaw(buf []byte) (int, error) {
 		return 0, fmt.Errorf("device not started")
 	}
 
-	d.pty.Master.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+	_ = d.pty.Master.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
 	return d.pty.Master.Read(buf)
 }
 

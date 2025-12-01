@@ -1,3 +1,4 @@
+// Package relay provides the core message relay service.
 package relay
 
 import (

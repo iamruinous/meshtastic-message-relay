@@ -1,3 +1,4 @@
+// Package logging provides structured logging for the relay service.
 package logging
 
 import (

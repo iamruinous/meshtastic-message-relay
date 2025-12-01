@@ -1,3 +1,4 @@
+// Package cli provides the command-line interface for the relay.
 package cli
 
 import (
@@ -65,11 +66,8 @@ func initConfig() {
 	viper.SetEnvPrefix("MESH_RELAY")
 	viper.AutomaticEnv()
 
-	// Read config file if it exists
-	if err := viper.ReadInConfig(); err == nil {
-		// Config file found and read successfully
-		// Will be logged once logging is initialized
-	}
+	// Read config file if it exists (errors are intentionally ignored)
+	_ = viper.ReadInConfig()
 }
 
 // GetConfigFile returns the config file being used

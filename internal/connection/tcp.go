@@ -17,13 +17,13 @@ import (
 
 // TCP implements Connection for TCP connections
 type TCP struct {
-	config    config.TCPConfig
-	conn      net.Conn
-	framer    *meshtastic.StreamFramer
-	messages  chan *message.Packet
-	nodeDB    map[uint32]*meshtastic.NodeInfo
-	myInfo    *meshtastic.MyNodeInfo
-	logger    *zap.Logger
+	config   config.TCPConfig
+	conn     net.Conn
+	framer   *meshtastic.StreamFramer
+	messages chan *message.Packet
+	nodeDB   map[uint32]*meshtastic.NodeInfo
+	myInfo   *meshtastic.MyNodeInfo
+	logger   *zap.Logger
 
 	mu        sync.RWMutex
 	connected bool
@@ -61,7 +61,7 @@ func (t *TCP) Connect(ctx context.Context) error {
 	}
 
 	// Set read deadline for non-blocking reads
-	conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+	_ = conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
 
 	t.conn = conn
 	t.framer = meshtastic.NewStreamFramer(conn, conn)
@@ -84,7 +84,7 @@ func (t *TCP) Messages() <-chan *message.Packet {
 }
 
 // Send transmits a packet over the TCP connection
-func (t *TCP) Send(ctx context.Context, packet *message.Packet) error {
+func (t *TCP) Send(_ context.Context, _ *message.Packet) error {
 	t.mu.RLock()
 	defer t.mu.RUnlock()
 
@@ -159,7 +159,7 @@ func (t *TCP) readPacket() {
 	// Reset read deadline
 	t.mu.RLock()
 	if t.conn != nil {
-		t.conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
+		_ = t.conn.SetReadDeadline(time.Now().Add(100 * time.Millisecond))
 	}
 	t.mu.RUnlock()
 

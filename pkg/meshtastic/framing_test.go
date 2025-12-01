@@ -92,7 +92,7 @@ func TestFrameFormat(t *testing.T) {
 	framer := NewStreamFramer(buf, buf)
 
 	data := []byte("test")
-	framer.WritePacket(data)
+	_ = framer.WritePacket(data)
 
 	// Check the raw bytes
 	raw := buf.Bytes()

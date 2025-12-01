@@ -98,46 +98,46 @@ type MeshPacket struct {
 
 // Data represents the decoded payload of a mesh packet
 type Data struct {
-	PortNum     PortNum
-	Payload     []byte
+	PortNum      PortNum
+	Payload      []byte
 	WantResponse bool
-	Dest        uint32
-	Source      uint32
-	RequestID   uint32
-	ReplyID     uint32
-	Emoji       uint32
+	Dest         uint32
+	Source       uint32
+	RequestID    uint32
+	ReplyID      uint32
+	Emoji        uint32
 }
 
 // FromRadio represents a message from the radio to the client
 type FromRadio struct {
-	ID              uint32
-	Packet          *MeshPacket
-	MyInfo          *MyNodeInfo
-	NodeInfo        *NodeInfo
-	ConfigCompleteID uint32
-	Rebooted        bool
-	Channel         *ChannelSettings
-	QueueStatus     *QueueStatus
-	XmodemPacket    []byte
-	Metadata        *DeviceMetadata
+	ID                     uint32
+	Packet                 *MeshPacket
+	MyInfo                 *MyNodeInfo
+	NodeInfo               *NodeInfo
+	ConfigCompleteID       uint32
+	Rebooted               bool
+	Channel                *ChannelSettings
+	QueueStatus            *QueueStatus
+	XmodemPacket           []byte
+	Metadata               *DeviceMetadata
 	MqttClientProxyMessage *MqttClientProxyMessage
 }
 
 // ToRadio represents a message from the client to the radio
 type ToRadio struct {
-	Packet       *MeshPacket
-	WantConfigID uint32
-	Disconnect   bool
-	XmodemPacket []byte
+	Packet                 *MeshPacket
+	WantConfigID           uint32
+	Disconnect             bool
+	XmodemPacket           []byte
 	MqttClientProxyMessage *MqttClientProxyMessage
 }
 
 // MyNodeInfo contains information about this node
 type MyNodeInfo struct {
-	MyNodeNum            uint32
-	RebootCount          uint32
-	MinAppVersion        uint32
-	DeviceMetadata       *DeviceMetadata
+	MyNodeNum      uint32
+	RebootCount    uint32
+	MinAppVersion  uint32
+	DeviceMetadata *DeviceMetadata
 }
 
 // NodeInfo contains information about a node in the mesh
@@ -156,41 +156,41 @@ type NodeInfo struct {
 
 // User contains user information for a node
 type User struct {
-	ID        string
-	LongName  string
-	ShortName string
-	MacAddr   []byte
-	HwModel   uint32
+	ID         string
+	LongName   string
+	ShortName  string
+	MacAddr    []byte
+	HwModel    uint32
 	IsLicensed bool
-	Role      uint32
-	PublicKey []byte
+	Role       uint32
+	PublicKey  []byte
 }
 
 // Position contains GPS position information
 type Position struct {
-	LatitudeI        int32
-	LongitudeI       int32
-	Altitude         int32
-	Time             uint32
-	LocationSource   uint32
-	AltitudeSource   uint32
-	Timestamp        uint32
-	TimestampMillis  int32
-	AltitudeHae      int32
-	AltGeoSep        int32
-	PDOP             uint32
-	HDOP             uint32
-	VDOP             uint32
-	GpsAccuracy      uint32
-	GroundSpeed      uint32
-	GroundTrack      uint32
-	FixQuality       uint32
-	FixType          uint32
-	SatsInView       uint32
-	SensorID         uint32
-	NextUpdate       uint32
-	SeqNumber        uint32
-	PrecisionBits    uint32
+	LatitudeI       int32
+	LongitudeI      int32
+	Altitude        int32
+	Time            uint32
+	LocationSource  uint32
+	AltitudeSource  uint32
+	Timestamp       uint32
+	TimestampMillis int32
+	AltitudeHae     int32
+	AltGeoSep       int32
+	PDOP            uint32
+	HDOP            uint32
+	VDOP            uint32
+	GpsAccuracy     uint32
+	GroundSpeed     uint32
+	GroundTrack     uint32
+	FixQuality      uint32
+	FixType         uint32
+	SatsInView      uint32
+	SensorID        uint32
+	NextUpdate      uint32
+	SeqNumber       uint32
+	PrecisionBits   uint32
 }
 
 // Latitude returns the latitude in degrees
@@ -205,57 +205,57 @@ func (p *Position) Longitude() float64 {
 
 // DeviceMetrics contains device telemetry
 type DeviceMetrics struct {
-	BatteryLevel    uint32
-	Voltage         float32
+	BatteryLevel       uint32
+	Voltage            float32
 	ChannelUtilization float32
-	AirUtilTx       float32
-	UptimeSeconds   uint32
+	AirUtilTx          float32
+	UptimeSeconds      uint32
 }
 
 // ChannelSettings contains channel configuration
 type ChannelSettings struct {
-	Index      uint32
-	Settings   *ChannelConfig
-	Role       uint32
+	Index    uint32
+	Settings *ChannelConfig
+	Role     uint32
 }
 
 // ChannelConfig contains channel parameters
 type ChannelConfig struct {
-	ChannelNum        uint32
-	Psk               []byte
-	Name              string
-	ID                uint32
-	UplinkEnabled     bool
-	DownlinkEnabled   bool
-	ModuleSettings    []byte
+	ChannelNum      uint32
+	Psk             []byte
+	Name            string
+	ID              uint32
+	UplinkEnabled   bool
+	DownlinkEnabled bool
+	ModuleSettings  []byte
 }
 
 // QueueStatus contains queue status information
 type QueueStatus struct {
-	Res        int32
-	Free       uint32
-	MaxLen     uint32
+	Res          int32
+	Free         uint32
+	MaxLen       uint32
 	MeshPacketID uint32
 }
 
 // DeviceMetadata contains device information
 type DeviceMetadata struct {
-	FirmwareVersion   string
+	FirmwareVersion    string
 	DeviceStateVersion uint32
-	CanShutdown       bool
-	HasWifi           bool
-	HasBluetooth      bool
-	HasEthernet       bool
-	Role              uint32
-	PositionFlags     uint32
-	HwModel           uint32
-	HasRemoteHardware bool
+	CanShutdown        bool
+	HasWifi            bool
+	HasBluetooth       bool
+	HasEthernet        bool
+	Role               uint32
+	PositionFlags      uint32
+	HwModel            uint32
+	HasRemoteHardware  bool
 }
 
 // MqttClientProxyMessage for MQTT proxy communication
 type MqttClientProxyMessage struct {
-	Topic   string
-	Data    []byte
+	Topic    string
+	Data     []byte
 	Retained bool
 }
 
@@ -407,8 +407,7 @@ func parseMeshPacket(data []byte) (*MeshPacket, error) {
 			}
 			val := binary.LittleEndian.Uint32(data[pos : pos+4])
 			pos += 4
-			switch fieldNum {
-			case 14:
+			if fieldNum == 14 {
 				mp.RxRssi = int32(val)
 			}
 		}
@@ -460,8 +459,7 @@ func parseData(data []byte) (*Data, error) {
 			fieldData := data[pos : pos+int(length)]
 			pos += int(length)
 
-			switch fieldNum {
-			case 2:
+			if fieldNum == 2 {
 				d.Payload = fieldData
 			}
 		}
@@ -470,6 +468,7 @@ func parseData(data []byte) (*Data, error) {
 	return d, nil
 }
 
+//nolint:unparam // error return kept for API consistency with other parse functions
 func parseMyNodeInfo(data []byte) (*MyNodeInfo, error) {
 	info := &MyNodeInfo{}
 	pos := 0
@@ -564,8 +563,7 @@ func parseNodeInfo(data []byte) (*NodeInfo, error) {
 			}
 			val := binary.LittleEndian.Uint32(data[pos : pos+4])
 			pos += 4
-			switch fieldNum {
-			case 4:
+			if fieldNum == 4 {
 				info.Snr = float32FromBits(val)
 			}
 		}

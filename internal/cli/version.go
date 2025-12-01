@@ -19,7 +19,7 @@ var versionCmd = &cobra.Command{
 	Use:   "version",
 	Short: "Print version information",
 	Long:  `Print detailed version information about the meshtastic-relay binary.`,
-	Run: func(cmd *cobra.Command, args []string) {
+	Run: func(_ *cobra.Command, _ []string) {
 		fmt.Printf("meshtastic-relay %s\n", Version)
 		fmt.Printf("  Commit:     %s\n", Commit)
 		fmt.Printf("  Built:      %s\n", Date)

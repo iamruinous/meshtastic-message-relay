@@ -7,33 +7,33 @@ type PortNum int32
 
 // Common Meshtastic port numbers.
 const (
-	PortNumUnknown       PortNum = 0
-	PortNumTextMessage   PortNum = 1
-	PortNumRemoteHW      PortNum = 2
-	PortNumPosition      PortNum = 3
-	PortNumNodeInfo      PortNum = 4
-	PortNumRouting       PortNum = 5
-	PortNumAdmin         PortNum = 6
+	PortNumUnknown               PortNum = 0
+	PortNumTextMessage           PortNum = 1
+	PortNumRemoteHW              PortNum = 2
+	PortNumPosition              PortNum = 3
+	PortNumNodeInfo              PortNum = 4
+	PortNumRouting               PortNum = 5
+	PortNumAdmin                 PortNum = 6
 	PortNumTextMessageCompressed PortNum = 7
-	PortNumWaypoint      PortNum = 8
-	PortNumAudio         PortNum = 9
-	PortNumDetectionSensor PortNum = 10
-	PortNumReply         PortNum = 32
-	PortNumIPTunnel      PortNum = 33
-	PortNumPaxCounter    PortNum = 34
-	PortNumSerial        PortNum = 64
-	PortNumStoreForward  PortNum = 65
-	PortNumRangeTest     PortNum = 66
-	PortNumTelemetry     PortNum = 67
-	PortNumZPS           PortNum = 68
-	PortNumSimulator     PortNum = 69
-	PortNumTraceroute    PortNum = 70
-	PortNumNeighborInfo  PortNum = 71
-	PortNumAAtak         PortNum = 72
-	PortNumMapReport     PortNum = 73
-	PortNumPrivate       PortNum = 256
-	PortNumAtakForwarder PortNum = 257
-	PortNumMax           PortNum = 511
+	PortNumWaypoint              PortNum = 8
+	PortNumAudio                 PortNum = 9
+	PortNumDetectionSensor       PortNum = 10
+	PortNumReply                 PortNum = 32
+	PortNumIPTunnel              PortNum = 33
+	PortNumPaxCounter            PortNum = 34
+	PortNumSerial                PortNum = 64
+	PortNumStoreForward          PortNum = 65
+	PortNumRangeTest             PortNum = 66
+	PortNumTelemetry             PortNum = 67
+	PortNumZPS                   PortNum = 68
+	PortNumSimulator             PortNum = 69
+	PortNumTraceroute            PortNum = 70
+	PortNumNeighborInfo          PortNum = 71
+	PortNumAAtak                 PortNum = 72
+	PortNumMapReport             PortNum = 73
+	PortNumPrivate               PortNum = 256
+	PortNumAtakForwarder         PortNum = 257
+	PortNumMax                   PortNum = 511
 )
 
 // String returns the string representation of the port number.

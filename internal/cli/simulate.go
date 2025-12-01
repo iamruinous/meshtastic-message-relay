@@ -57,7 +57,7 @@ func init() {
 	simulateCmd.Flags().StringVar(&simSymlink, "symlink", "", "create symlink to PTY at this path")
 }
 
-func runSimulate(cmd *cobra.Command, args []string) error {
+func runSimulate(_ *cobra.Command, _ []string) error {
 	config := simulator.DefaultConfig()
 	config.NodeNum = simNodeNum
 	config.LongName = simLongName
@@ -75,7 +75,7 @@ func runSimulate(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return fmt.Errorf("failed to start simulator: %w", err)
 	}
-	defer device.Stop()
+	defer func() { _ = device.Stop() }()
 
 	// Create symlink if requested
 	if simSymlink != "" {
@@ -83,7 +83,7 @@ func runSimulate(cmd *cobra.Command, args []string) error {
 			fmt.Fprintf(os.Stderr, "Warning: failed to create symlink: %v\n", err)
 		} else {
 			fmt.Printf("Created symlink: %s -> %s\n", simSymlink, path)
-			defer os.Remove(simSymlink)
+			defer func() { _ = os.Remove(simSymlink) }()
 		}
 	}
 

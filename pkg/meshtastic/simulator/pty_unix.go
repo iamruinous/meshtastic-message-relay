@@ -13,9 +13,9 @@ import (
 
 // PTY represents a pseudo-terminal pair
 type PTY struct {
-	Master     *os.File
-	Slave      *os.File
-	SlavePath  string
+	Master    *os.File
+	Slave     *os.File
+	SlavePath string
 }
 
 // OpenPTY creates a new pseudo-terminal pair
@@ -28,20 +28,20 @@ func OpenPTY() (*PTY, error) {
 
 	// Grant access to the slave
 	if err := grantpt(master); err != nil {
-		master.Close()
+		_ = master.Close()
 		return nil, fmt.Errorf("grantpt failed: %w", err)
 	}
 
 	// Unlock the slave
 	if err := unlockpt(master); err != nil {
-		master.Close()
+		_ = master.Close()
 		return nil, fmt.Errorf("unlockpt failed: %w", err)
 	}
 
 	// Get the slave path
 	slavePath, err := ptsname(master)
 	if err != nil {
-		master.Close()
+		_ = master.Close()
 		return nil, fmt.Errorf("ptsname failed: %w", err)
 	}
 
@@ -51,7 +51,7 @@ func OpenPTY() (*PTY, error) {
 
 	// Set raw mode on master to avoid terminal processing affecting data
 	if err := setRawMode(int(master.Fd())); err != nil {
-		master.Close()
+		_ = master.Close()
 		return nil, fmt.Errorf("failed to set raw mode: %w", err)
 	}
 
@@ -115,7 +115,7 @@ func grantpt(f *os.File) error {
 
 // unlockpt unlocks the slave pseudo-terminal
 func unlockpt(f *os.File) error {
-	var unlock int32 = 0
+	var unlock int32
 	_, _, errno := syscall.Syscall(syscall.SYS_IOCTL, f.Fd(), syscall.TIOCSPTLCK, uintptr(unsafe.Pointer(&unlock)))
 	if errno != 0 {
 		return errno
@@ -136,6 +136,6 @@ func ptsname(f *os.File) (string, error) {
 // CreateSymlink creates a symlink to the slave device at the given path
 func (p *PTY) CreateSymlink(path string) error {
 	// Remove existing symlink if it exists
-	os.Remove(path)
+	_ = os.Remove(path)
 	return os.Symlink(p.SlavePath, path)
 }

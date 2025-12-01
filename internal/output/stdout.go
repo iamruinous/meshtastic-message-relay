@@ -31,7 +31,7 @@ func NewStdout(cfg config.OutputConfig) (*Stdout, error) {
 }
 
 // Send outputs a message to stdout
-func (s *Stdout) Send(ctx context.Context, msg *message.Packet) error {
+func (s *Stdout) Send(_ context.Context, msg *message.Packet) error {
 	if s.format == "json" {
 		return s.sendJSON(msg)
 	}
@@ -43,7 +43,7 @@ func (s *Stdout) sendJSON(msg *message.Packet) error {
 	if err != nil {
 		return fmt.Errorf("failed to marshal message: %w", err)
 	}
-	fmt.Fprintln(os.Stdout, string(data))
+	_, _ = fmt.Fprintln(os.Stdout, string(data))
 	return nil
 }
 
@@ -64,7 +64,7 @@ func (s *Stdout) sendText(msg *message.Packet) error {
 		payload = fmt.Sprintf("%v", msg.Payload)
 	}
 
-	fmt.Fprintf(os.Stdout, "[%s] %s (%s): %s\n",
+	_, _ = fmt.Fprintf(os.Stdout, "[%s] %s (%s): %s\n",
 		timestamp,
 		fromNode,
 		msg.PortNum.String(),

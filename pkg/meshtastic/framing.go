@@ -1,3 +1,4 @@
+// Package meshtastic provides Meshtastic protocol handling and parsing.
 package meshtastic
 
 import (

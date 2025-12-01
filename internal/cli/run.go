@@ -42,7 +42,7 @@ func init() {
 	runCmd.Flags().BoolVarP(&interactive, "interactive", "i", false, "run with interactive TUI")
 }
 
-func runRelay(cmd *cobra.Command, args []string) error {
+func runRelay(_ *cobra.Command, _ []string) error {
 	// Initialize logging
 	logCfg := logging.Config{
 		Level:  viper.GetString("logging.level"),
