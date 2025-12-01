@@ -44,16 +44,18 @@ func NewFile(cfg config.OutputConfig) (*File, error) {
 	}
 
 	maxSizeMB := 100
-	if m, ok := cfg.Options["max_size_mb"].(int); ok {
+	switch m := cfg.Options["max_size_mb"].(type) {
+	case int:
 		maxSizeMB = m
-	} else if m, ok := cfg.Options["max_size_mb"].(float64); ok {
+	case float64:
 		maxSizeMB = int(m)
 	}
 
 	maxBackups := 5
-	if m, ok := cfg.Options["max_backups"].(int); ok {
+	switch m := cfg.Options["max_backups"].(type) {
+	case int:
 		maxBackups = m
-	} else if m, ok := cfg.Options["max_backups"].(float64); ok {
+	case float64:
 		maxBackups = int(m)
 	}
 
@@ -68,12 +70,12 @@ func NewFile(cfg config.OutputConfig) (*File, error) {
 
 	// Ensure directory exists
 	dir := filepath.Dir(path)
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return nil, fmt.Errorf("failed to create log directory: %w", err)
 	}
 
 	// Open file for appending
-	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return nil, fmt.Errorf("failed to open log file: %w", err)
 	}
@@ -149,7 +151,7 @@ func (f *File) checkRotation() error {
 	_ = os.Rename(f.path, f.path+".1")
 
 	// Open new file
-	file, err := os.OpenFile(f.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	file, err := os.OpenFile(f.path, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0o644)
 	if err != nil {
 		return err
 	}

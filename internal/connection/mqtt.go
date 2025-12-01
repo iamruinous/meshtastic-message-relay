@@ -31,9 +31,9 @@ type MQTT struct {
 }
 
 // NewMQTT creates a new MQTT connection
-func NewMQTT(cfg config.MQTTConfig) (*MQTT, error) {
+func NewMQTT(cfg *config.MQTTConfig) (*MQTT, error) {
 	return &MQTT{
-		config:   cfg,
+		config:   *cfg,
 		messages: make(chan *message.Packet, 100),
 		nodeDB:   make(map[uint32]*meshtastic.NodeInfo),
 		logger:   logging.With(zap.String("connection", "mqtt")),

@@ -15,7 +15,7 @@ func New(cfg *config.ConnectionConfig) (Connection, error) {
 	case "tcp":
 		return NewTCP(cfg.TCP)
 	case "mqtt":
-		return NewMQTT(cfg.MQTT)
+		return NewMQTT(&cfg.MQTT)
 	default:
 		return nil, fmt.Errorf("unknown connection type: %s", cfg.Type)
 	}

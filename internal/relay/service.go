@@ -183,7 +183,7 @@ func (s *Service) relayLoop(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			s.logger.Debug("Relay loop stopped: context cancelled")
+			s.logger.Debug("Relay loop stopped: context canceled")
 			return
 
 		case msg, ok := <-msgChan:

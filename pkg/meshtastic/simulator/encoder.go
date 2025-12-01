@@ -25,7 +25,7 @@ func encodeVarint(v uint64) []byte {
 }
 
 // encodeTag encodes a protobuf field tag
-func encodeTag(fieldNum int, wireType int) []byte {
+func encodeTag(fieldNum, wireType int) []byte {
 	return encodeVarint(uint64(fieldNum<<3 | wireType))
 }
 
@@ -76,7 +76,7 @@ func encodeFloat32(fieldNum int, v float32) []byte {
 }
 
 // EncodeMyNodeInfo encodes a MyNodeInfo message
-func EncodeMyNodeInfo(nodeNum uint32, rebootCount uint32) []byte {
+func EncodeMyNodeInfo(nodeNum, rebootCount uint32) []byte {
 	var msg []byte
 	msg = append(msg, encodeUint32(1, nodeNum)...)     // my_node_num
 	msg = append(msg, encodeUint32(8, rebootCount)...) // reboot_count
@@ -107,7 +107,7 @@ func EncodePosition(latitudeI, longitudeI, altitude int32, timestamp uint32) []b
 }
 
 // EncodeNodeInfo encodes a NodeInfo message
-func EncodeNodeInfo(num uint32, user []byte, position []byte, snr float32, lastHeard uint32) []byte {
+func EncodeNodeInfo(num uint32, user, position []byte, snr float32, lastHeard uint32) []byte {
 	var msg []byte
 	msg = append(msg, encodeUint32(1, num)...)
 	if len(user) > 0 {

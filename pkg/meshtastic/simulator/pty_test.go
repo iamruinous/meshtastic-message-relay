@@ -3,6 +3,7 @@
 package simulator
 
 import (
+	"bytes"
 	"os"
 	"testing"
 	"time"
@@ -44,7 +45,7 @@ func TestPTYBidirectional(t *testing.T) {
 	}
 	t.Logf("Read %d bytes from slave: %s", n, string(buf[:n]))
 
-	if string(buf[:n]) != string(testData) {
+	if !bytes.Equal(buf[:n], testData) {
 		t.Errorf("Master->Slave: expected %q, got %q", testData, buf[:n])
 	}
 
@@ -65,7 +66,7 @@ func TestPTYBidirectional(t *testing.T) {
 	}
 	t.Logf("Read %d bytes from master: %s", n, string(buf2[:n]))
 
-	if string(buf2[:n]) != string(testData2) {
+	if !bytes.Equal(buf2[:n], testData2) {
 		t.Errorf("Slave->Master: expected %q, got %q", testData2, buf2[:n])
 	}
 

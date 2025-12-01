@@ -65,7 +65,7 @@ func runSimulate(_ *cobra.Command, _ []string) error {
 	config.MessageInterval = simInterval
 	config.Verbose = simVerbose
 
-	device := simulator.New(config)
+	device := simulator.New(&config)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()

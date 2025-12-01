@@ -144,7 +144,7 @@ func (t *TCP) readLoop(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			t.logger.Debug("Read loop stopped: context cancelled")
+			t.logger.Debug("Read loop stopped: context canceled")
 			return
 		case <-t.stopCh:
 			t.logger.Debug("Read loop stopped: stop signal")
