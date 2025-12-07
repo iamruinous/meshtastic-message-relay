@@ -39,3 +39,4 @@ result-*
 # Built binary
 relay
 meshtastic-relay
+.claude/settings.local.json
