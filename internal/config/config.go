@@ -64,10 +64,17 @@ type FileOutputConfig struct {
 
 // AppriseOutputConfig defines Apprise output settings.
 type AppriseOutputConfig struct {
-	URL     string            `mapstructure:"url"`
-	Tag     string            `mapstructure:"tag"`
-	Timeout time.Duration     `mapstructure:"timeout"`
-	Headers map[string]string `mapstructure:"headers"`
+	URL      string                          `mapstructure:"url"`
+	Tag      string                          `mapstructure:"tag"`
+	Timeout  time.Duration                   `mapstructure:"timeout"`
+	Headers  map[string]string               `mapstructure:"headers"`
+	Channels map[uint32]AppriseChannelConfig `mapstructure:"channels"`
+}
+
+// AppriseChannelConfig defines per-channel Apprise settings.
+type AppriseChannelConfig struct {
+	Tag     string `mapstructure:"tag"`
+	Enabled *bool  `mapstructure:"enabled"` // nil means inherit from parent
 }
 
 // WebhookOutputConfig defines webhook output settings.

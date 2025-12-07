@@ -13,14 +13,21 @@ import (
 	"github.com/iamruinous/meshtastic-message-relay/internal/message"
 )
 
+// AppriseChannelConfig holds per-channel settings for Apprise
+type AppriseChannelConfig struct {
+	Tag     string
+	Enabled *bool // nil means inherit from parent
+}
+
 // Apprise outputs messages to an Apprise notification service
 type Apprise struct {
-	url     string
-	tag     string
-	timeout time.Duration
-	headers map[string]string
-	enabled bool
-	client  *http.Client
+	url            string
+	tag            string
+	timeout        time.Duration
+	headers        map[string]string
+	enabled        bool
+	client         *http.Client
+	channelConfigs map[uint32]AppriseChannelConfig
 }
 
 // ApprisePayload is the JSON payload sent to Apprise
@@ -62,12 +69,35 @@ func NewApprise(cfg config.OutputConfig) (*Apprise, error) {
 		}
 	}
 
+	// Parse per-channel configurations
+	channelConfigs := make(map[uint32]AppriseChannelConfig)
+	if channels, ok := cfg.Options["channels"].(map[string]interface{}); ok {
+		for chStr, chCfg := range channels {
+			var channelNum uint32
+			if _, err := fmt.Sscanf(chStr, "%d", &channelNum); err != nil {
+				continue // skip invalid channel numbers
+			}
+
+			if chMap, ok := chCfg.(map[string]interface{}); ok {
+				cc := AppriseChannelConfig{}
+				if t, ok := chMap["tag"].(string); ok {
+					cc.Tag = t
+				}
+				if e, ok := chMap["enabled"].(bool); ok {
+					cc.Enabled = &e
+				}
+				channelConfigs[channelNum] = cc
+			}
+		}
+	}
+
 	return &Apprise{
-		url:     url,
-		tag:     tag,
-		timeout: timeout,
-		headers: headers,
-		enabled: cfg.Enabled,
+		url:            url,
+		tag:            tag,
+		timeout:        timeout,
+		headers:        headers,
+		enabled:        cfg.Enabled,
+		channelConfigs: channelConfigs,
 		client: &http.Client{
 			Timeout: timeout,
 		},
@@ -76,14 +106,27 @@ func NewApprise(cfg config.OutputConfig) (*Apprise, error) {
 
 // Send sends a message to Apprise
 func (a *Apprise) Send(ctx context.Context, msg *message.Packet) error {
+	// Check for per-channel enabled override
+	if chCfg, ok := a.channelConfigs[msg.Channel]; ok && chCfg.Enabled != nil {
+		if !*chCfg.Enabled {
+			return nil // Channel is explicitly disabled
+		}
+	}
+
 	title := a.formatTitle(msg)
 	body := a.formatBody(msg)
+
+	// Use per-channel tag if configured, otherwise fall back to default
+	tag := a.tag
+	if chCfg, ok := a.channelConfigs[msg.Channel]; ok && chCfg.Tag != "" {
+		tag = chCfg.Tag
+	}
 
 	payload := ApprisePayload{
 		Body:  body,
 		Title: title,
 		Type:  "info",
-		Tag:   a.tag,
+		Tag:   tag,
 	}
 
 	data, err := json.Marshal(payload)

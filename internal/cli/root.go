@@ -39,7 +39,7 @@ func init() {
 	cobra.OnInitialize(initConfig)
 
 	// Persistent flags available to all commands
-	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is ./config.yaml)")
+	rootCmd.PersistentFlags().StringVarP(&cfgFile, "config", "c", "", "config file (default is ~/.config/meshtastic-relay/config.yml)")
 	rootCmd.PersistentFlags().StringVarP(&logLevel, "log-level", "l", "info", "log level (debug, info, warn, error)")
 	rootCmd.PersistentFlags().StringVar(&logFormat, "log-format", "text", "log format (json, text)")
 
@@ -54,12 +54,12 @@ func initConfig() {
 		// Use config file from the flag
 		viper.SetConfigFile(cfgFile)
 	} else {
-		// Search for config in current directory and common locations
+		// Search for config in common locations (in priority order)
 		viper.SetConfigName("config")
-		viper.SetConfigType("yaml")
-		viper.AddConfigPath(".")
-		viper.AddConfigPath("/etc/meshtastic-relay")
+		viper.SetConfigType("yaml") // Supports both .yaml and .yml extensions
 		viper.AddConfigPath("$HOME/.config/meshtastic-relay")
+		viper.AddConfigPath("/etc/meshtastic-relay")
+		viper.AddConfigPath(".")
 	}
 
 	// Environment variables
