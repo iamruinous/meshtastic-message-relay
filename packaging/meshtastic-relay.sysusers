@@ -1,0 +1,2 @@
+# Create meshtastic-relay user
+u meshtastic-relay - "Meshtastic Relay Service" - /usr/sbin/nologin

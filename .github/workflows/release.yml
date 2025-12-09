@@ -46,16 +46,23 @@ jobs:
           go-version: '1.25'
           cache: true
 
+      - name: Install nfpm
+        run: |
+          go install github.com/goreleaser/nfpm/v2/cmd/nfpm@latest
+
       - name: Get version
         id: version
-        run: echo "VERSION=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
+        run: |
+          VERSION=${GITHUB_REF#refs/tags/v}
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+          echo "TAG=${GITHUB_REF#refs/tags/}" >> $GITHUB_OUTPUT
 
       - name: Run tests
         run: go test -v ./...
 
       - name: Build binaries
         run: |
-          VERSION=${{ steps.version.outputs.VERSION }}
+          VERSION=${{ steps.version.outputs.TAG }}
           COMMIT=$(git rev-parse --short HEAD)
           DATE=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
           LDFLAGS="-X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE}"
@@ -74,24 +81,192 @@ jobs:
           # Windows
           GOOS=windows GOARCH=amd64 go build -ldflags "${LDFLAGS}" -o dist/meshtastic-relay-windows-amd64.exe ./cmd/relay
 
-      - name: Create checksums
+      - name: Build .deb packages
         run: |
-          cd dist
-          sha256sum * > checksums.txt
+          VERSION=${{ steps.version.outputs.VERSION }}
 
-      - name: Create archives
+          # Build amd64 deb
+          GOARCH=amd64 GOARCH_SUFFIX=amd64 VERSION=${VERSION} envsubst < nfpm.yaml > nfpm-amd64.yaml
+          nfpm package -p deb -f nfpm-amd64.yaml -t dist/meshtastic-relay_${VERSION}_amd64.deb
+
+          # Build arm64 deb
+          GOARCH=arm64 GOARCH_SUFFIX=arm64 VERSION=${VERSION} envsubst < nfpm.yaml > nfpm-arm64.yaml
+          nfpm package -p deb -f nfpm-arm64.yaml -t dist/meshtastic-relay_${VERSION}_arm64.deb
+
+          # Build armhf deb (armv7)
+          GOARCH=armhf GOARCH_SUFFIX=armv7 VERSION=${VERSION} envsubst < nfpm.yaml > nfpm-armhf.yaml
+          nfpm package -p deb -f nfpm-armhf.yaml -t dist/meshtastic-relay_${VERSION}_armhf.deb
+
+      - name: Build .rpm packages
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+
+          # Build x86_64 rpm
+          GOARCH=x86_64 GOARCH_SUFFIX=amd64 VERSION=${VERSION} envsubst < nfpm.yaml > nfpm-x86_64.yaml
+          nfpm package -p rpm -f nfpm-x86_64.yaml -t dist/meshtastic-relay-${VERSION}-1.x86_64.rpm
+
+          # Build aarch64 rpm
+          GOARCH=aarch64 GOARCH_SUFFIX=arm64 VERSION=${VERSION} envsubst < nfpm.yaml > nfpm-aarch64.yaml
+          nfpm package -p rpm -f nfpm-aarch64.yaml -t dist/meshtastic-relay-${VERSION}-1.aarch64.rpm
+
+          # Build armv7hl rpm
+          GOARCH=armv7hl GOARCH_SUFFIX=armv7 VERSION=${VERSION} envsubst < nfpm.yaml > nfpm-armv7hl.yaml
+          nfpm package -p rpm -f nfpm-armv7hl.yaml -t dist/meshtastic-relay-${VERSION}-1.armv7hl.rpm
+
+      - name: Build Arch Linux packages
+        run: |
+          VERSION=${{ steps.version.outputs.VERSION }}
+          TAG=${{ steps.version.outputs.TAG }}
+
+          mkdir -p arch-build
+
+          # Copy supporting files
+          cp packaging/meshtastic-relay.service arch-build/
+          cp configs/example.yaml arch-build/config.yaml.example
+          cp packaging/meshtastic-relay.sysusers arch-build/
+          cp packaging/meshtastic-relay.tmpfiles arch-build/
+
+          # Create PKGBUILD for x86_64
+          cat > arch-build/PKGBUILD << 'PKGBUILD_EOF'
+          # Maintainer: iamruinous <iamruinous@users.noreply.github.com>
+          pkgname=meshtastic-relay
+          pkgver=${VERSION}
+          pkgrel=1
+          pkgdesc="Meshtastic Message Relay Service - forwards messages from Meshtastic nodes to configurable endpoints"
+          arch=('x86_64')
+          url="https://github.com/iamruinous/meshtastic-message-relay"
+          license=('MIT')
+          depends=('glibc')
+          optdepends=('systemd: for systemd service support')
+          source=("meshtastic-relay"
+                  "meshtastic-relay.service"
+                  "config.yaml.example"
+                  "meshtastic-relay.sysusers"
+                  "meshtastic-relay.tmpfiles")
+          sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP' 'SKIP')
+
+          package() {
+              install -Dm755 meshtastic-relay "$pkgdir/usr/bin/meshtastic-relay"
+              install -Dm644 meshtastic-relay.service "$pkgdir/usr/lib/systemd/system/meshtastic-relay.service"
+              install -Dm644 config.yaml.example "$pkgdir/etc/meshtastic-relay/config.yaml.example"
+              install -Dm644 meshtastic-relay.sysusers "$pkgdir/usr/lib/sysusers.d/meshtastic-relay.conf"
+              install -Dm644 meshtastic-relay.tmpfiles "$pkgdir/usr/lib/tmpfiles.d/meshtastic-relay.conf"
+          }
+          PKGBUILD_EOF
+
+          # Replace version in PKGBUILD
+          sed -i "s/\${VERSION}/${VERSION}/g" arch-build/PKGBUILD
+
+          # Build x86_64 package
+          cp dist/meshtastic-relay-linux-amd64 arch-build/meshtastic-relay
+          cd arch-build
+          # Create package using tar (simplified pkg.tar.zst creation without makepkg)
+          mkdir -p pkg/usr/bin pkg/usr/lib/systemd/system pkg/etc/meshtastic-relay pkg/usr/lib/sysusers.d pkg/usr/lib/tmpfiles.d
+          install -m755 meshtastic-relay pkg/usr/bin/
+          install -m644 meshtastic-relay.service pkg/usr/lib/systemd/system/
+          install -m644 config.yaml.example pkg/etc/meshtastic-relay/
+          install -m644 meshtastic-relay.sysusers pkg/usr/lib/sysusers.d/meshtastic-relay.conf
+          install -m644 meshtastic-relay.tmpfiles pkg/usr/lib/tmpfiles.d/meshtastic-relay.conf
+
+          # Create .PKGINFO
+          cat > pkg/.PKGINFO << PKGINFO_EOF
+          pkgname = meshtastic-relay
+          pkgver = ${VERSION}-1
+          pkgdesc = Meshtastic Message Relay Service - forwards messages from Meshtastic nodes to configurable endpoints
+          url = https://github.com/iamruinous/meshtastic-message-relay
+          arch = x86_64
+          license = MIT
+          depend = glibc
+          optdepend = systemd: for systemd service support
+          PKGINFO_EOF
+
+          # Create package archive
+          cd pkg
+          tar --zstd -cf ../../dist/meshtastic-relay-${VERSION}-1-x86_64.pkg.tar.zst .PKGINFO usr etc
+          cd ../..
+
+          # Build aarch64 package
+          rm -rf arch-build/pkg
+          mkdir -p arch-build/pkg/usr/bin arch-build/pkg/usr/lib/systemd/system arch-build/pkg/etc/meshtastic-relay arch-build/pkg/usr/lib/sysusers.d arch-build/pkg/usr/lib/tmpfiles.d
+          cp dist/meshtastic-relay-linux-arm64 arch-build/pkg/usr/bin/meshtastic-relay
+          chmod 755 arch-build/pkg/usr/bin/meshtastic-relay
+          install -m644 arch-build/meshtastic-relay.service arch-build/pkg/usr/lib/systemd/system/
+          install -m644 arch-build/config.yaml.example arch-build/pkg/etc/meshtastic-relay/
+          install -m644 arch-build/meshtastic-relay.sysusers arch-build/pkg/usr/lib/sysusers.d/meshtastic-relay.conf
+          install -m644 arch-build/meshtastic-relay.tmpfiles arch-build/pkg/usr/lib/tmpfiles.d/meshtastic-relay.conf
+
+          cat > arch-build/pkg/.PKGINFO << PKGINFO_EOF
+          pkgname = meshtastic-relay
+          pkgver = ${VERSION}-1
+          pkgdesc = Meshtastic Message Relay Service - forwards messages from Meshtastic nodes to configurable endpoints
+          url = https://github.com/iamruinous/meshtastic-message-relay
+          arch = aarch64
+          license = MIT
+          depend = glibc
+          optdepend = systemd: for systemd service support
+          PKGINFO_EOF
+
+          cd arch-build/pkg
+          tar --zstd -cf ../../dist/meshtastic-relay-${VERSION}-1-aarch64.pkg.tar.zst .PKGINFO usr etc
+          cd ../..
+
+          # Build armv7h package
+          rm -rf arch-build/pkg
+          mkdir -p arch-build/pkg/usr/bin arch-build/pkg/usr/lib/systemd/system arch-build/pkg/etc/meshtastic-relay arch-build/pkg/usr/lib/sysusers.d arch-build/pkg/usr/lib/tmpfiles.d
+          cp dist/meshtastic-relay-linux-armv7 arch-build/pkg/usr/bin/meshtastic-relay
+          chmod 755 arch-build/pkg/usr/bin/meshtastic-relay
+          install -m644 arch-build/meshtastic-relay.service arch-build/pkg/usr/lib/systemd/system/
+          install -m644 arch-build/config.yaml.example arch-build/pkg/etc/meshtastic-relay/
+          install -m644 arch-build/meshtastic-relay.sysusers arch-build/pkg/usr/lib/sysusers.d/meshtastic-relay.conf
+          install -m644 arch-build/meshtastic-relay.tmpfiles arch-build/pkg/usr/lib/tmpfiles.d/meshtastic-relay.conf
+
+          cat > arch-build/pkg/.PKGINFO << PKGINFO_EOF
+          pkgname = meshtastic-relay
+          pkgver = ${VERSION}-1
+          pkgdesc = Meshtastic Message Relay Service - forwards messages from Meshtastic nodes to configurable endpoints
+          url = https://github.com/iamruinous/meshtastic-message-relay
+          arch = armv7h
+          license = MIT
+          depend = glibc
+          optdepend = systemd: for systemd service support
+          PKGINFO_EOF
+
+          cd arch-build/pkg
+          tar --zstd -cf ../../dist/meshtastic-relay-${VERSION}-1-armv7h.pkg.tar.zst .PKGINFO usr etc
+          cd ../..
+
+      - name: Create archives for raw binaries
         run: |
           cd dist
-          for f in meshtastic-relay-*; do
-            if [[ ! "$f" == *.exe ]]; then
+
+          # Archive Linux binaries (skip if already removed by package builds)
+          for f in meshtastic-relay-linux-*; do
+            if [[ -f "$f" && ! "$f" =~ \.tar\.gz$ && ! "$f" =~ \.pkg\.tar\.zst$ ]]; then
               tar czf "${f}.tar.gz" "$f"
               rm "$f"
-            else
+            fi
+          done
+
+          # Archive macOS binaries
+          for f in meshtastic-relay-darwin-*; do
+            if [[ -f "$f" && ! "$f" =~ \.tar\.gz$ ]]; then
+              tar czf "${f}.tar.gz" "$f"
+              rm "$f"
+            fi
+          done
+
+          # Archive Windows binary
+          for f in meshtastic-relay-windows-*.exe; do
+            if [[ -f "$f" ]]; then
               zip "${f%.exe}.zip" "$f"
               rm "$f"
             fi
           done
-          sha256sum *.tar.gz *.zip > checksums.txt
+
+      - name: Create checksums
+        run: |
+          cd dist
+          sha256sum * > checksums.txt
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
@@ -99,4 +274,4 @@ jobs:
           files: dist/*
           generate_release_notes: true
           draft: false
-          prerelease: ${{ contains(steps.version.outputs.VERSION, '-') }}
+          prerelease: ${{ contains(steps.version.outputs.TAG, '-') }}
