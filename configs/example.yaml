@@ -1,0 +1,92 @@
+# Meshtastic Message Relay Configuration
+# Copy this file to config.yaml and customize for your setup
+
+# Connection to your Meshtastic node
+connection:
+  # Connection type: serial, tcp, or mqtt
+  type: serial
+
+  # Serial connection settings (used when type: serial)
+  serial:
+    port: /dev/ttyUSB0
+    baud: 115200
+
+  # TCP connection settings (used when type: tcp)
+  tcp:
+    host: 192.168.1.100
+    port: 4403
+
+  # MQTT connection settings (used when type: mqtt)
+  mqtt:
+    broker: tcp://localhost:1883
+    topic: "meshtastic/#"
+    username: ""
+    password: ""
+    client_id: "meshtastic-relay"
+
+# Output destinations - enable one or more
+outputs:
+  # Console output - useful for debugging
+  - type: stdout
+    enabled: true
+    format: json  # Options: json, text
+
+  # File logging with rotation support
+  - type: file
+    enabled: false
+    path: /var/log/meshtastic/messages.log
+    format: json  # Options: json, text
+    rotate: true
+    max_size_mb: 100
+    max_backups: 5
+    max_age_days: 30
+
+  # Apprise notifications - supports 80+ services
+  # See: https://github.com/caronc/apprise
+  - type: apprise
+    enabled: false
+    url: http://apprise:8000/notify
+    tag: meshtastic  # Default tag for all channels
+    timeout: 30s
+    # headers:
+    #   X-Custom-Header: value
+    # Per-channel configuration (optional)
+    # Customize notification settings for specific Meshtastic channels
+    # channels:
+    #   0:  # Primary channel
+    #     tag: primary-mesh
+    #   1:  # Secondary channel (e.g., alerts)
+    #     tag: mesh-alerts
+    #   2:  # Another channel - can be disabled
+    #     enabled: false
+
+  # Generic webhook - forward to any HTTP endpoint
+  - type: webhook
+    enabled: false
+    url: https://your-service.com/webhook
+    method: POST
+    timeout: 30s
+    headers:
+      Content-Type: application/json
+      # Authorization: "Bearer ${WEBHOOK_TOKEN}"
+
+# Message filtering (optional)
+# Empty arrays mean no filtering (all messages pass through)
+filters:
+  # Only relay specific message types
+  # Available types: TEXT_MESSAGE_APP, POSITION_APP, TELEMETRY_APP,
+  #                  NODEINFO_APP, ROUTING_APP, WAYPOINT_APP, etc.
+  message_types: []
+
+  # Only relay from specific node IDs (use decimal node numbers)
+  node_ids: []
+
+  # Only relay from specific channels (0 = primary channel)
+  channels: []
+
+# Logging configuration
+logging:
+  # Log level: debug, info, warn, error
+  level: info
+  # Log format: json, text
+  format: json

@@ -30,3 +30,13 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Nix
+result
+result-*
+.direnv/
+
+# Built binary
+relay
+meshtastic-relay
+.claude/settings.local.json

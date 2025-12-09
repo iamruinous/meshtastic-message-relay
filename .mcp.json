@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "nixos": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "mcp-nixos"
+      ],
+      "env": {}
+    },
+    "mcp-farm": {
+      "type": "sse",
+      "url": "https://mcp.meskill.farm/sse"
+    }
+  }
+}
