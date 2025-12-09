@@ -18,7 +18,7 @@
         # Build the Go module
         meshtastic-relay = pkgs.buildGoModule {
           pname = "meshtastic-relay";
-          version = "0.1.0";
+          version = "0.1.1";
 
           src = ./.;
 
