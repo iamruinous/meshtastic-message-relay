@@ -24,12 +24,12 @@ jobs:
       - name: Setup Cachix
         uses: cachix/cachix-action@v15
         with:
-          name: iamruinous
+          name: meshtastic-message-relay
           authToken: '${{ secrets.CACHIX_AUTH_TOKEN }}'
 
       - name: Build and push to Cachix
         run: |
-          nix build .#default --json | jq -r '.[].outputs.out' | cachix push iamruinous
+          nix build .#default --json | jq -r '.[].outputs.out' | cachix push meshtastic-message-relay
 
   release:
     name: Create Release
