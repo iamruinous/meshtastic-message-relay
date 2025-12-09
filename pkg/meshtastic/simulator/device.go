@@ -9,6 +9,7 @@ import (
 	"math/rand"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/iamruinous/meshtastic-message-relay/pkg/meshtastic"
@@ -93,7 +94,7 @@ type Device struct {
 	mu         sync.RWMutex
 	running    bool
 	stopCh     chan struct{}
-	packetID   uint32
+	packetID   atomic.Uint32
 	configSent bool
 }
 
@@ -106,12 +107,13 @@ func New(config *DeviceConfig) *Device {
 		}
 	}
 
-	return &Device{
-		config:   *config,
-		logger:   logger,
-		stopCh:   make(chan struct{}),
-		packetID: uint32(rand.Intn(10000)),
+	d := &Device{
+		config: *config,
+		logger: logger,
+		stopCh: make(chan struct{}),
 	}
+	d.packetID.Store(uint32(rand.Intn(10000)))
+	return d
 }
 
 // Start starts the simulated device and returns the path to connect to
@@ -192,8 +194,8 @@ func (d *Device) SendTextMessage(fromNode uint32, text string) error {
 		return fmt.Errorf("device not running")
 	}
 
-	d.packetID++
-	packet := d.createTextMessagePacket(fromNode, text)
+	packetID := d.packetID.Add(1)
+	packet := d.createTextMessagePacket(fromNode, text, packetID)
 	return d.sendFromRadio(packet, nil, nil, 0)
 }
 
@@ -206,8 +208,8 @@ func (d *Device) SendPosition(fromNode uint32, lat, lon float64, alt int32) erro
 		return fmt.Errorf("device not running")
 	}
 
-	d.packetID++
-	packet := d.createPositionPacket(fromNode, lat, lon, alt)
+	packetID := d.packetID.Add(1)
+	packet := d.createPositionPacket(fromNode, lat, lon, alt, packetID)
 	return d.sendFromRadio(packet, nil, nil, 0)
 }
 
@@ -353,14 +355,14 @@ func (d *Device) sendConfig(configID uint32) {
 }
 
 func (d *Device) sendFromRadio(packet, myInfo, nodeInfo []byte, configCompleteID uint32) error {
-	d.packetID++
-	fromRadio := EncodeFromRadio(d.packetID, packet, myInfo, nodeInfo, configCompleteID)
+	packetID := d.packetID.Add(1)
+	fromRadio := EncodeFromRadio(packetID, packet, myInfo, nodeInfo, configCompleteID)
 
 	d.logger("Sending FromRadio: %d bytes", len(fromRadio))
 	return d.framer.WritePacket(fromRadio)
 }
 
-func (d *Device) createTextMessagePacket(fromNode uint32, text string) []byte {
+func (d *Device) createTextMessagePacket(fromNode uint32, text string, packetID uint32) []byte {
 	// Create Data message with text
 	data := EncodeData(1, []byte(text)) // PortNum 1 = TEXT_MESSAGE_APP
 
@@ -369,7 +371,7 @@ func (d *Device) createTextMessagePacket(fromNode uint32, text string) []byte {
 		fromNode,
 		0xFFFFFFFF, // Broadcast
 		0,          // Channel
-		d.packetID,
+		packetID,
 		data,
 		uint32(time.Now().Unix()),
 		float32(rand.Intn(20)-5), // SNR
@@ -380,7 +382,7 @@ func (d *Device) createTextMessagePacket(fromNode uint32, text string) []byte {
 	return packet
 }
 
-func (d *Device) createPositionPacket(fromNode uint32, lat, lon float64, alt int32) []byte {
+func (d *Device) createPositionPacket(fromNode uint32, lat, lon float64, alt int32, packetID uint32) []byte {
 	// Create Position message
 	position := EncodePosition(
 		int32(lat*1e7),
@@ -397,7 +399,7 @@ func (d *Device) createPositionPacket(fromNode uint32, lat, lon float64, alt int
 		fromNode,
 		0xFFFFFFFF, // Broadcast
 		0,          // Channel
-		d.packetID,
+		packetID,
 		data,
 		uint32(time.Now().Unix()),
 		float32(rand.Intn(20)-5),
