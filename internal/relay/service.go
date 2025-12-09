@@ -142,7 +142,7 @@ func (s *Service) GetOutputs() []output.Output {
 
 func (s *Service) initConnection() error {
 	var err error
-	s.connection, err = connection.New(s.config.Connection)
+	s.connection, err = connection.New(&s.config.Connection)
 	return err
 }
 
@@ -183,7 +183,7 @@ func (s *Service) relayLoop(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			s.logger.Debug("Relay loop stopped: context cancelled")
+			s.logger.Debug("Relay loop stopped: context canceled")
 			return
 
 		case msg, ok := <-msgChan:

@@ -32,7 +32,7 @@ func Initialize(cfg Config) error {
 	encoderConfig.EncodeTime = zapcore.ISO8601TimeEncoder
 	encoderConfig.EncodeLevel = zapcore.CapitalLevelEncoder
 
-	if strings.ToLower(cfg.Format) == "json" {
+	if strings.EqualFold(cfg.Format, "json") {
 		encoder = zapcore.NewJSONEncoder(encoderConfig)
 	} else {
 		encoderConfig.EncodeLevel = zapcore.CapitalColorLevelEncoder

@@ -684,8 +684,7 @@ func parsePosition(data []byte) (*Position, error) {
 	return pos, nil
 }
 
-func decodeVarint(data []byte) (uint64, int) {
-	var val uint64
+func decodeVarint(data []byte) (val uint64, bytesRead int) {
 	var shift uint
 	for i, b := range data {
 		val |= uint64(b&0x7F) << shift

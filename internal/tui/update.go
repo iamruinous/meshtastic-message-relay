@@ -12,6 +12,8 @@ import (
 )
 
 // Update handles messages and updates the model
+//
+//nolint:gocritic // hugeParam: Model must be value receiver to implement tea.Model interface
 func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmds []tea.Cmd
 

@@ -154,7 +154,7 @@ func (s *Serial) readLoop(ctx context.Context) {
 	for {
 		select {
 		case <-ctx.Done():
-			s.logger.Debug("Read loop stopped: context cancelled")
+			s.logger.Debug("Read loop stopped: context canceled")
 			return
 		case <-s.stopCh:
 			s.logger.Debug("Read loop stopped: stop signal")

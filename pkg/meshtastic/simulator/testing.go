@@ -23,7 +23,7 @@ func NewTestDevice(t *testing.T) *TestDevice {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &TestDevice{
-		Device: New(config),
+		Device: New(&config),
 		t:      t,
 		ctx:    ctx,
 		cancel: cancel,
@@ -31,7 +31,7 @@ func NewTestDevice(t *testing.T) *TestDevice {
 }
 
 // NewTestDeviceWithConfig creates a test device with custom configuration
-func NewTestDeviceWithConfig(t *testing.T, config DeviceConfig) *TestDevice {
+func NewTestDeviceWithConfig(t *testing.T, config *DeviceConfig) *TestDevice {
 	ctx, cancel := context.WithCancel(context.Background())
 
 	return &TestDevice{

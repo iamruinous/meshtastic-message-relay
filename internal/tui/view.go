@@ -9,6 +9,8 @@ import (
 )
 
 // View renders the UI
+//
+//nolint:gocritic // hugeParam: Model must be value receiver to implement tea.Model interface
 func (m Model) View() string {
 	if m.quitting {
 		return "Goodbye!\n"
@@ -53,6 +55,7 @@ func (m Model) View() string {
 	return b.String()
 }
 
+//nolint:gocritic // hugeParam: consistency with tea.Model interface methods
 func (m Model) renderStatusBar() string {
 	// Connection status
 	status := StatusIndicator(m.connected)
@@ -73,6 +76,7 @@ func (m Model) renderStatusBar() string {
 	return status + connInfo + outputInfo + uptimeInfo
 }
 
+//nolint:gocritic // hugeParam: consistency with tea.Model interface methods
 func (m Model) renderStats() string {
 	received := statLabelStyle.Render("Received: ") + statValueStyle.Render(fmt.Sprintf("%d", m.stats.MessagesReceived))
 	sent := statLabelStyle.Render(" | Sent: ") + statValueStyle.Render(fmt.Sprintf("%d", m.stats.MessagesSent))
@@ -87,6 +91,7 @@ func (m Model) renderStats() string {
 	return received + sent + filtered + errors
 }
 
+//nolint:gocritic // hugeParam: consistency with tea.Model interface methods
 func (m Model) renderMessages() string {
 	if len(m.messages) == 0 {
 		return statLabelStyle.Render("No messages yet. Waiting for incoming packets...")
@@ -102,6 +107,7 @@ func (m Model) renderMessages() string {
 	return b.String()
 }
 
+//nolint:gocritic // hugeParam: consistency with tea.Model interface methods
 func (m Model) renderMessage(msg MessageDisplay) string {
 	timeStr := messageTimeStyle.Render(msg.Time.Format("15:04:05"))
 	from := messageFromStyle.Render(msg.From)

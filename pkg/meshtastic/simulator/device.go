@@ -98,7 +98,7 @@ type Device struct {
 }
 
 // New creates a new simulated device
-func New(config DeviceConfig) *Device {
+func New(config *DeviceConfig) *Device {
 	logger := func(_ string, _ ...interface{}) {}
 	if config.Verbose {
 		logger = func(format string, args ...interface{}) {
@@ -107,7 +107,7 @@ func New(config DeviceConfig) *Device {
 	}
 
 	return &Device{
-		config:   config,
+		config:   *config,
 		logger:   logger,
 		stopCh:   make(chan struct{}),
 		packetID: uint32(rand.Intn(10000)),
@@ -444,8 +444,7 @@ func (d *Device) messageLoop(ctx context.Context) {
 	}
 }
 
-func decodeVarint(data []byte) (uint64, int) {
-	var val uint64
+func decodeVarint(data []byte) (val uint64, bytesRead int) {
 	var shift uint
 	for i, b := range data {
 		val |= uint64(b&0x7F) << shift

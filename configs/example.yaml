@@ -46,10 +46,19 @@ outputs:
   - type: apprise
     enabled: false
     url: http://apprise:8000/notify
-    tag: meshtastic
+    tag: meshtastic  # Default tag for all channels
     timeout: 30s
     # headers:
     #   X-Custom-Header: value
+    # Per-channel configuration (optional)
+    # Customize notification settings for specific Meshtastic channels
+    # channels:
+    #   0:  # Primary channel
+    #     tag: primary-mesh
+    #   1:  # Secondary channel (e.g., alerts)
+    #     tag: mesh-alerts
+    #   2:  # Another channel - can be disabled
+    #     enabled: false
 
   # Generic webhook - forward to any HTTP endpoint
   - type: webhook

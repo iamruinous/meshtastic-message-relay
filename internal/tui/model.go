@@ -66,6 +66,8 @@ func New(service *relay.Service) Model {
 }
 
 // Init initializes the model
+//
+//nolint:gocritic // hugeParam: Model must be value receiver to implement tea.Model interface
 func (m Model) Init() tea.Cmd {
 	return tea.Batch(
 		m.spinner.Tick,
