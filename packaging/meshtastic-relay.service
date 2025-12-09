@@ -1,0 +1,26 @@
+[Unit]
+Description=Meshtastic Message Relay Service
+Documentation=https://github.com/iamruinous/meshtastic-message-relay
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=meshtastic-relay
+Group=meshtastic-relay
+ExecStart=/usr/bin/meshtastic-relay --config /etc/meshtastic-relay/config.yaml
+Restart=on-failure
+RestartSec=5
+
+# Security hardening
+NoNewPrivileges=true
+ProtectSystem=strict
+ProtectHome=true
+PrivateTmp=true
+ReadWritePaths=/var/log/meshtastic-relay
+
+# Allow access to serial devices if needed
+SupplementaryGroups=dialout
+
+[Install]
+WantedBy=multi-user.target

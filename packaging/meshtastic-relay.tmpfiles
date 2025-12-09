@@ -1,0 +1,2 @@
+# Create log directory for meshtastic-relay
+d /var/log/meshtastic-relay 0755 meshtastic-relay meshtastic-relay -

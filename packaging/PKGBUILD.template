@@ -1,0 +1,41 @@
+# Maintainer: iamruinous <iamruinous@users.noreply.github.com>
+pkgname=meshtastic-relay
+pkgver=${VERSION}
+pkgrel=1
+pkgdesc="Meshtastic Message Relay Service - forwards messages from Meshtastic nodes to configurable endpoints"
+arch=('x86_64' 'aarch64' 'armv7h')
+url="https://github.com/iamruinous/meshtastic-message-relay"
+license=('MIT')
+depends=('glibc')
+optdepends=('systemd: for systemd service support')
+backup=('etc/meshtastic-relay/config.yaml')
+source_x86_64=("meshtastic-relay-linux-amd64::https://github.com/iamruinous/meshtastic-message-relay/releases/download/v${pkgver}/meshtastic-relay-linux-amd64.tar.gz")
+source_aarch64=("meshtastic-relay-linux-arm64::https://github.com/iamruinous/meshtastic-message-relay/releases/download/v${pkgver}/meshtastic-relay-linux-arm64.tar.gz")
+source_armv7h=("meshtastic-relay-linux-armv7::https://github.com/iamruinous/meshtastic-message-relay/releases/download/v${pkgver}/meshtastic-relay-linux-armv7.tar.gz")
+source=("meshtastic-relay.service"
+        "config.yaml.example"
+        "meshtastic-relay.sysusers"
+        "meshtastic-relay.tmpfiles")
+sha256sums=('SKIP' 'SKIP' 'SKIP' 'SKIP')
+sha256sums_x86_64=('${SHA256_AMD64}')
+sha256sums_aarch64=('${SHA256_ARM64}')
+sha256sums_armv7h=('${SHA256_ARMV7}')
+
+package() {
+    # Install binary
+    case "$CARCH" in
+        x86_64)  install -Dm755 meshtastic-relay-linux-amd64 "$pkgdir/usr/bin/meshtastic-relay" ;;
+        aarch64) install -Dm755 meshtastic-relay-linux-arm64 "$pkgdir/usr/bin/meshtastic-relay" ;;
+        armv7h)  install -Dm755 meshtastic-relay-linux-armv7 "$pkgdir/usr/bin/meshtastic-relay" ;;
+    esac
+
+    # Install systemd service
+    install -Dm644 meshtastic-relay.service "$pkgdir/usr/lib/systemd/system/meshtastic-relay.service"
+
+    # Install example config
+    install -Dm644 config.yaml.example "$pkgdir/etc/meshtastic-relay/config.yaml.example"
+
+    # Install sysusers and tmpfiles
+    install -Dm644 meshtastic-relay.sysusers "$pkgdir/usr/lib/sysusers.d/meshtastic-relay.conf"
+    install -Dm644 meshtastic-relay.tmpfiles "$pkgdir/usr/lib/tmpfiles.d/meshtastic-relay.conf"
+}
