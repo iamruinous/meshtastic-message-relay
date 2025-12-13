@@ -57,4 +57,4 @@ WORKDIR /home/relay
 
 # Default command
 ENTRYPOINT ["meshtastic-relay"]
-CMD ["--config", "/etc/meshtastic-relay/config.yaml"]
+CMD ["--config", "/etc/meshtastic-relay/config.yaml", "run"]
